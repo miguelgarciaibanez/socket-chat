@@ -19,6 +19,7 @@ io.on('connection', (client) => {
 
         let people = users.addPerson( client.id, user.name, user.room );
 
+        client.broadcast.to(user.room).emit('createMessage', createMessage('Admin', `${user.name} has join the chat`));
         client.broadcast.to(user.room).emit('peopleList', {users: users.getPeopleByRoom(user.room)});
         callback(users.getPeopleByRoom(user.room));
         
@@ -30,13 +31,15 @@ io.on('connection', (client) => {
         client.broadcast.to(deletedPerson.room).emit('peopleList', {users: users.getPeopleByRoom(deletedPerson.room)});
     })
 
-    client.on('createMessage', ( data ) => {
+    client.on('createMessage', ( data, callback ) => {
 
         let person = users.getPerson(client.id)
         
         let message = createMessage( person.name, data.message );
 
         client.broadcast.to(person.room).emit('createMessage', message);
+
+        callback ( message );
     });
 
 
